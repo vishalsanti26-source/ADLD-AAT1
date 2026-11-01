@@ -1,0 +1,52 @@
+//DESIGN
+`timescale 1ns/1ps
+
+module comparator4(
+    input [3:0] a, b,
+    output reg greater,
+    output reg equal,
+    output reg less
+);
+
+always @(*) begin
+    greater = (a > b);
+    equal   = (a == b);
+    less    = (a < b);
+end
+
+endmodule
+
+//TB
+`timescale 1ns/1ps
+
+module comparator4_tb;
+    reg [3:0] a, b;
+    wire greater, equal, less;
+
+    // Instantiate the Comparator
+    comparator4 dut (
+        .a(a), 
+        .b(b), 
+        .greater(greater), 
+        .equal(equal), 
+        .less(less)
+    );
+
+    initial begin
+        // Setup VCD file generation for waveform simulation
+        $dumpfile("comparator4.vcd");
+        $dumpvars(0, comparator4_tb);
+
+        a = 4'd9; b = 4'd4; #10;
+        $display("A=%d | B=%d ---> A>B: %b | A=B: %b | A<B: %b", a, b, greater, equal, less);
+
+        a = 4'd6; b = 4'd6; #10;
+        $display("A=%d | B=%d ---> A>B: %b | A=B: %b | A<B: %b", a, b, greater, equal, less);
+
+        a = 4'd2; b = 4'd12; #10;
+        $display("A=%d | B=%d ---> A>B: %b | A=B: %b | A<B: %b", a, b, greater, equal, less);
+
+        $finish;
+    end
+
+endmodule
