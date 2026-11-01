@@ -1,0 +1,59 @@
+//DESIGN
+`timescale 1ns/1ps
+
+module ring_counter4(
+    input clk,
+    input reset,
+    input enable,
+    output reg [3:0] q
+);
+
+always @(posedge clk) begin
+    if(reset)
+        q <= 4'b0001;
+    else if(enable)
+        q <= {q[2:0], q[3]};
+end
+
+endmodule
+
+//TB
+`timescale 1ns/1ps
+
+module ring_counter4_tb;
+    reg clk, reset, enable;
+    wire [3:0] q;
+
+    // Instantiate the Ring Counter
+    ring_counter4 dut (
+        .clk(clk), 
+        .reset(reset), 
+        .enable(enable), 
+        .q(q)
+    );
+
+    // Clock generator: 10ns period
+    always #5 clk = ~clk;
+
+    initial begin
+        // Setup VCD file generation for waveform simulation
+        $dumpfile("ring_counter4.vcd");
+        $dumpvars(0, ring_counter4_tb);
+
+        clk = 0;
+        reset = 1;
+        enable = 0;
+        
+        #12 reset = 0;
+        enable = 1;
+        
+        repeat(8) begin
+            @(posedge clk);
+            #1;
+            $display("Time=%0t | Ring Counter = %b", $time, q);
+        end
+        
+        $finish;
+    end
+
+endmodule
