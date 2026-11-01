@@ -1,0 +1,54 @@
+//DESIGN
+`timescale 1ns/1ps
+
+module parity4(
+    input [3:0] data_in,
+    input parity_in,
+    output even_parity_bit,
+    output odd_parity_bit,
+    output parity_error
+);
+
+    assign even_parity_bit = ^data_in;
+    assign odd_parity_bit  = ~(^data_in);
+    assign parity_error    = (^data_in) ^ parity_in;
+
+endmodule
+
+//TB
+`timescale 1ns/1ps
+
+module parity4_tb;
+    reg [3:0] data_in;
+    reg parity_in;
+    wire even_parity_bit;
+    wire odd_parity_bit;
+    wire parity_error;
+
+    // Instantiate the Parity Generator and Checker
+    parity4 dut (
+        .data_in(data_in),
+        .parity_in(parity_in),
+        .even_parity_bit(even_parity_bit),
+        .odd_parity_bit(odd_parity_bit),
+        .parity_error(parity_error)
+    );
+
+    initial begin
+        // Setup VCD file generation for waveform simulation
+        $dumpfile("parity4.vcd");
+        $dumpvars(0, parity4_tb);
+
+        data_in = 4'b1011;
+        parity_in = 1'b1;
+        #10;
+        $display("Data=%b | Even=%b | Odd=%b | Error=%b", data_in, even_parity_bit, odd_parity_bit, parity_error);
+
+        parity_in = 1'b0;
+        #10;
+        $display("Data=%b | Wrong parity_in=%b | Error=%b", data_in, parity_in, parity_error);
+
+        $finish;
+    end
+
+endmodule
