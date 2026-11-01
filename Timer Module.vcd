@@ -1,0 +1,76 @@
+//DESIGN
+`timescale 1ns/1ps
+
+module timer_module #(
+    parameter COUNT_MAX = 4
+)(
+    input clk,
+    input reset,
+    input enable,
+    output reg done
+);
+
+    integer count;
+
+    always @(posedge clk) begin
+        if (reset) begin
+            count <= 0;
+            done  <= 0;
+        end
+        else if (enable) begin
+            if (count == COUNT_MAX - 1) begin
+                count <= 0;
+                done  <= 1;
+            end
+            else begin
+                count <= count + 1;
+                done  <= 0;
+            end
+        end
+        else begin
+            done <= 0;
+        end
+    end
+
+endmodule
+
+//TB
+`timescale 1ns/1ps
+
+module timer_module_tb;
+    reg clk, reset, enable;
+    wire done;
+
+    // Instantiate the Timer Module with COUNT_MAX = 4
+    timer_module #(.COUNT_MAX(4)) dut (
+        .clk(clk), 
+        .reset(reset), 
+        .enable(enable), 
+        .done(done)
+    );
+
+    // Clock generator: 10ns period
+    always #5 clk = ~clk;
+
+    initial begin
+        // Setup VCD file generation for waveform simulation
+        $dumpfile("timer_module.vcd");
+        $dumpvars(0, timer_module_tb);
+
+        clk = 0;
+        reset = 1;
+        enable = 0;
+        
+        #12 reset = 0;
+        enable = 1;
+        
+        repeat(12) begin
+            @(posedge clk);
+            #1;
+            $display("Time=%0t | Done=%b", $time, done);
+        end
+        
+        $finish;
+    end
+
+endmodule
