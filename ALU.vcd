@@ -1,0 +1,69 @@
+//DESIGN
+`timescale 1ns/1ps
+
+module alu4(
+    input [3:0] a, b,
+    input [2:0] sel,
+    output reg [3:0] y,
+    output reg carry
+);
+
+always @(*) begin
+    y = 4'b0000;
+    carry = 1'b0;
+    
+    case(sel)
+        3'b000: {carry, y} = {1'b0, a} + {1'b0, b}; // Addition
+        3'b001: y = a - b;                          // Subtraction
+        3'b010: y = a & b;                          // AND
+        3'b011: y = a | b;                          // OR
+        3'b100: y = a ^ b;                          // XOR
+        3'b101: y = ~a;                             // NOT (A)
+        3'b110: y = a << 1;                         // Shift Left
+        3'b111: y = a >> 1;                         // Shift Right
+        default: begin
+            y = 4'b0000;
+            carry = 1'b0;
+        end
+    endcase
+end
+
+endmodule
+
+//TB
+`timescale 1ns/1ps
+
+module alu4_tb;
+    reg [3:0] a, b;
+    reg [2:0] sel;
+    wire [3:0] y;
+    wire carry;
+    integer i;
+
+    // Instantiate the ALU
+    alu4 dut (
+        .a(a), 
+        .b(b), 
+        .sel(sel), 
+        .y(y), 
+        .carry(carry)
+    );
+
+    initial begin
+        // Setup VCD file generation for waveform simulation
+        $dumpfile("alu4.vcd");
+        $dumpvars(0, alu4_tb);
+
+        a = 4'd9;
+        b = 4'd5;
+        
+        for (i = 0; i < 8; i = i + 1) begin
+            sel = i;
+            #10;
+            $display("sel=%b | a=%d | b=%d | y=%d | carry=%b", sel, a, b, y, carry);
+        end
+        
+        $finish;
+    end
+
+endmodule
